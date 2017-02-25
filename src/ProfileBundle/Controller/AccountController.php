@@ -3,6 +3,7 @@
 namespace ProfileBundle\Controller;
 
 use ProfileBundle\Form\AccountRegistrationForm;
+use ProfileBundle\Form\AccountRegistration;
 use Sensio\Bundle\FrameworkExtraBundle\Configuration\Route;
 use Symfony\Bundle\FrameworkBundle\Controller\Controller;
 use Symfony\Component\HttpFoundation\Request;
@@ -25,12 +26,7 @@ class AccountController extends Controller
             ]);
         }
 
-        $data = $form->getData();
-        $accountId = $this->doRegisterAccount(
-            $data['email'],
-            $data['name'],
-            $data['password']
-        );
+        $accountId = $this->doRegisterAccount($form->getData());
 
         return $this->redirectToRoute('account_welcome', [
             'accountId' => $accountId,
@@ -79,27 +75,22 @@ class AccountController extends Controller
         return $statement->rowCount() > 0;
     }
 
-    private function doRegisterAccount($email, $name, $password)
+    private function doRegisterAccount(AccountRegistration $command)
     {
         $connection = $this->databaseConnection();
 
         $connection->exec(sprintf(
             'INSERT INTO accounts SET email="%s", name="%s", password="%s"',
-            $email,
-            $name,
-            $password
+            $command->email,
+            $command->name,
+            $command->password
         ));
 
         $id = $connection->lastInsertId();
 
-        $this->sendConfirmationEmail($id, $email, $name);
+        $this->sendConfirmationEmail($id, $command->email, $command->name);
 
         return $id;
-    }
-
-    private function passwordIsSafe($password)
-    {
-        return strlen($password) >= 4;
     }
 
     private function sendConfirmationEmail($id, $email, $name)

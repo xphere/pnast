@@ -2,9 +2,11 @@
 
 namespace ProfileBundle\Form;
 
+use ProfileBundle\Form\AccountRegistration;
 use Symfony\Component\Form\AbstractType;
 use Symfony\Component\Form\Extension\Core\Type;
 use Symfony\Component\Form\FormBuilderInterface;
+use Symfony\Component\OptionsResolver\OptionsResolver;
 
 class AccountRegistrationForm extends AbstractType
 {
@@ -19,5 +21,10 @@ class AccountRegistrationForm extends AbstractType
                 'second_options' => [ 'label' => 'Repeat password', ],
             ])
         ;
+    }
+
+    public function configureOptions(OptionsResolver $resolver)
+    {
+        $resolver->setDefault('data_class', AccountRegistration::class);
     }
 }
