@@ -1,12 +1,12 @@
 <?php
 
-namespace AppBundle\Controller;
+namespace ProfileBundle\Controller;
 
 use Sensio\Bundle\FrameworkExtraBundle\Configuration\Route;
 use Symfony\Bundle\FrameworkBundle\Controller\Controller;
 use Symfony\Component\HttpFoundation\Request;
 
-class DefaultController extends Controller
+class AccountController extends Controller
 {
     /**
      * @Route("/register", name="account_register")
@@ -56,7 +56,7 @@ class DefaultController extends Controller
             }
         }
 
-        return $this->render('default/register.html.twig', [
+        return $this->render('account/register.html.twig', [
             'errors' => $errors,
             'email' => $email,
             'name' => $name,
@@ -76,7 +76,7 @@ class DefaultController extends Controller
     {
         $account = $this->findAccount($accountId);
 
-        return $this->render('default/welcome.html.twig', [
+        return $this->render('account/welcome.html.twig', [
             'name' => $account['name'],
         ]);
     }
