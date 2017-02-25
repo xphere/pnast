@@ -2,6 +2,7 @@
 
 namespace ProfileBundle\Controller;
 
+use ProfileBundle\Form\AccountRegistrationForm;
 use Sensio\Bundle\FrameworkExtraBundle\Configuration\Route;
 use Symfony\Bundle\FrameworkBundle\Controller\Controller;
 use Symfony\Component\HttpFoundation\Request;
@@ -13,53 +14,26 @@ class AccountController extends Controller
      */
     public function registerAction(Request $request)
     {
-        $email = '';
-        $name = '';
-        $errors = [];
-        if ($request->getMethod() === Request::METHOD_POST) {
+        $form = $this
+            ->createForm(AccountRegistrationForm::class)
+            ->handleRequest($request)
+        ;
 
-            $email = $request->request->get('email');
-            if (empty($email)) {
-                $errors['email'][] = 'Email field must not be empty';
-
-            } elseif (!filter_var($email, FILTER_VALIDATE_EMAIL)) {
-                $errors['email'][] = 'Email field must be a valid email';
-
-            } elseif ($this->accountAlreadyExistsWithEmail($email)) {
-                $errors['email'][] = 'Email is already registered';
-            }
-
-            $name = $request->request->get('name');
-            if (empty($name)) {
-                $errors['name'][] = 'Name must not be empty';
-            }
-
-            $password = $request->request->get('password');
-            if (empty($password)) {
-                $errors['password'][] = 'Password cannot be empty';
-
-            } elseif (!$this->passwordIsSafe($password)) {
-                $errors['password'][] = 'Password is not safe enough';
-            }
-
-            $passwordAgain = $request->request->get('password-again');
-            if ($password !== $passwordAgain) {
-                $errors['password-again'][] = 'Both passwords must match';
-            }
-
-            if (empty($errors)) {
-                $accountId = $this->doRegisterAccount($email, $password, $name);
-
-                return $this->redirectToRoute('account_welcome', [
-                    'accountId' => $accountId,
-                ]);
-            }
+        if (!$form->isSubmitted() || !$form->isValid()) {
+            return $this->render('account/register.html.twig', [
+                'form' => $form->createView(),
+            ]);
         }
 
-        return $this->render('account/register.html.twig', [
-            'errors' => $errors,
-            'email' => $email,
-            'name' => $name,
+        $data = $form->getData();
+        $accountId = $this->doRegisterAccount(
+            $data['email'],
+            $data['name'],
+            $data['password']
+        );
+
+        return $this->redirectToRoute('account_welcome', [
+            'accountId' => $accountId,
         ]);
     }
 
@@ -105,7 +79,7 @@ class AccountController extends Controller
         return $statement->rowCount() > 0;
     }
 
-    private function doRegisterAccount($email, $password, $name)
+    private function doRegisterAccount($email, $name, $password)
     {
         $connection = $this->databaseConnection();
 

@@ -1,30 +1,21 @@
 {% extends 'base.html.twig' %}
 
 
+{% form_theme form _self %}
+
+
 {% block title 'Register' %}
 
 
 {% block body %}
     <h1>User register</h1>
-    <form action="{{ path('account_register') }}" method="post">
-        <label for="email">Email</label>
-        <input id="email" name="email" value="{{ email }}">
-        {{ _self.show_errors(errors, 'email') }}
-        <br>
-        <label for="name">Name</label>
-        <input id="name" name="name" value="{{ name }}">
-        {{ _self.show_errors(errors, 'name') }}
-        <br>
-        <label for="password">Password</label>
-        <input id="password" name="password" type="password">
-        {{ _self.show_errors(errors, 'password') }}
-        <br>
-        <label for="password-again">Repeat password</label>
-        <input id="password-again" name="password-again" type="password">
-        {{ _self.show_errors(errors, 'password-again') }}
-        <br>
+    {{ form_start(form) }}
+        {{ form_row(form.email) }}
+        {{ form_row(form.name) }}
+        {{ form_row(form.password) }}
+        {{ form_rest(form) }}
         <input type="submit">
-    </form>
+    {{ form_end(form) }}
 {% endblock %}
 
 
@@ -47,12 +38,21 @@
     </style>
 {% endblock %}
 
-{% macro show_errors(errors, index) %}
-    {% if errors[index] is defined %}
+
+{% block form_row %}
+    {{- form_label(form) -}}
+    {{- form_widget(form) -}}
+    {{- form_errors(form) -}}
+    <br>
+{% endblock %}
+
+
+{% block form_errors %}
+    {%- if errors|length > 0 -%}
         <ul class="errors">
-            {% for error_description in errors[index] %}
-                <li>{{ error_description }}</li>
-            {% endfor %}
+            {%- for error in errors -%}
+                <li>{{ error.message }}</li>
+            {%- endfor -%}
         </ul>
-    {% endif %}
-{% endmacro %}
+    {%- endif -%}
+{% endblock %}
