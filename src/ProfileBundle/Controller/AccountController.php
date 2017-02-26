@@ -64,22 +64,22 @@ class AccountController extends Controller
 
     private function sendConfirmationEmail($id, $email, $name)
     {
-        $subject = sprintf(
-            'Thanks for registering, %s',
-            $name
-        );
+        $message = \Swift_Message::newInstance()
+            ->setSubject(sprintf(
+                'Thanks for registering, %s',
+                $name
+            ))
+            ->setTo($email)
+            ->setBody(
+                $this->renderView(':email:registration.html.twig', [
+                    'accountId' => $id,
+                    'name' => $name,
+                ]),
+                'text/html'
+            )
+        ;
 
-        $welcomeUrl = $this->generateUrl('account_welcome', [
-            'accountId' => $id,
-        ]);
-
-        $message = sprintf(
-            'Dear %s, we are glad you register in our website, please do visit %s to follow.',
-            $name,
-            $welcomeUrl
-        );
-
-        mail($email, $subject, $message);
+        $this->get('mailer')->send($message);
     }
 
     private function accountManager(): AccountManager
