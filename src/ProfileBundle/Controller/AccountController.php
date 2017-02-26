@@ -64,11 +64,19 @@ class AccountController extends Controller
 
     private function doRegisterAccount(AccountRegistration $command)
     {
+        $salt = base64_encode(random_bytes(30));
+        $encodedPassword = $this->get('security.encoder_factory')
+             ->getEncoder(Account::class)
+             ->encodePassword($command->password, $salt)
+        ;
+
         $account = new Account(
             $command->name,
             $command->email,
-            $command->password
+            $encodedPassword,
+            $salt
         );
+
         $this->saveAccount($account);
 
         $id = $account->id();

@@ -28,17 +28,25 @@ class Account
     private $email;
 
     /**
-     * @ORM\Column(type="string", length=255)
+     * @ORM\Column(type="string", length=60)
      */
     private $password;
 
-    public function __construct($name, $email, $password)
+    /**
+     * @ORM\Column(type="string", length=40)
+     */
+    private $salt;
+
+    public function __construct($name, $email, $password, $salt)
     {
         $this->name = $name;
         $this->email = $email;
         $this->password = $password;
+        $this->salt = $salt;
     }
 
     public function id(): int { return $this->id; }
     public function name(): string { return $this->name; }
+    public function email(): string { return $this->email; }
+    public function password(): string { return $this->password; }
 }
