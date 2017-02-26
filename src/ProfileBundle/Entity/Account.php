@@ -5,7 +5,7 @@ namespace ProfileBundle\Entity;
 use Doctrine\ORM\Mapping as ORM;
 
 /**
- * @ORM\Entity()
+ * @ORM\Entity(repositoryClass="ProfileBundle\Entity\AccountRepository")
  * @ORM\Table(name="accounts")
  */
 class Account
