@@ -2,9 +2,9 @@
 
 namespace ProfileBundle\Controller;
 
-use ProfileBundle\Entity\Account;
 use ProfileBundle\Form\AccountRegistrationForm;
 use ProfileBundle\Form\AccountRegistration;
+use ProfileBundle\Entity\AccountManager;
 use Sensio\Bundle\FrameworkExtraBundle\Configuration\Route;
 use Symfony\Bundle\FrameworkBundle\Controller\Controller;
 use Symfony\Component\HttpFoundation\Request;
@@ -45,39 +45,16 @@ class AccountController extends Controller
      */
     public function welcomeAction(int $accountId)
     {
-        $account = $this->findAccount($accountId);
+        $account = $this->accountManager()->find($accountId);
 
         return $this->render('account/welcome.html.twig', [
             'name' => $account->name(),
         ]);
     }
 
-    private function findAccount($accountId): Account
-    {
-        return $this->get('profile.repository.account')->byId($accountId);
-    }
-
-    private function saveAccount(Account $account): void
-    {
-        $this->get('profile.repository.account')->save($account);
-    }
-
     private function doRegisterAccount(AccountRegistration $command)
     {
-        $salt = base64_encode(random_bytes(30));
-        $encodedPassword = $this->get('security.encoder_factory')
-             ->getEncoder(Account::class)
-             ->encodePassword($command->password, $salt)
-        ;
-
-        $account = new Account(
-            $command->name,
-            $command->email,
-            $encodedPassword,
-            $salt
-        );
-
-        $this->saveAccount($account);
+        $account = $this->accountManager()->register($command);
 
         $id = $account->id();
         $this->sendConfirmationEmail($id, $command->email, $command->name);
@@ -103,5 +80,10 @@ class AccountController extends Controller
         );
 
         mail($email, $subject, $message);
+    }
+
+    private function accountManager(): AccountManager
+    {
+        return $this->get('profile.manager.account');
     }
 }

@@ -16,3 +16,14 @@ services:
         class: ProfileBundle\Entity\AccountRepository
         factory: [ "@doctrine", getRepository ]
         arguments: [ ProfileBundle\Entity\Account ]
+
+    profile.manager.account:
+        class: ProfileBundle\Entity\AccountManager
+        arguments:
+            - "@profile.repository.account"
+            - "@profile.password_encoder"
+
+    profile.password_encoder:
+        class: ProfileBundle\Security\PasswordEncoder
+        arguments:
+            - "@security.encoder_factory"
