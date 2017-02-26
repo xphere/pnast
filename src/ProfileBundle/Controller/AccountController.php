@@ -3,7 +3,6 @@
 namespace ProfileBundle\Controller;
 
 use ProfileBundle\Form\AccountRegistrationForm;
-use ProfileBundle\Form\AccountRegistration;
 use ProfileBundle\Entity\AccountManager;
 use Sensio\Bundle\FrameworkExtraBundle\Configuration\Route;
 use Symfony\Bundle\FrameworkBundle\Controller\Controller;
@@ -27,10 +26,13 @@ class AccountController extends Controller
             ]);
         }
 
-        $accountId = $this->doRegisterAccount($form->getData());
+        $account = $this
+            ->accountManager()
+            ->register($form->getData())
+        ;
 
         return $this->redirectToRoute('account_welcome', [
-            'accountId' => $accountId,
+            'accountId' => $account->id(),
         ]);
     }
 
@@ -50,36 +52,6 @@ class AccountController extends Controller
         return $this->render('account/welcome.html.twig', [
             'name' => $account->name(),
         ]);
-    }
-
-    private function doRegisterAccount(AccountRegistration $command)
-    {
-        $account = $this->accountManager()->register($command);
-
-        $id = $account->id();
-        $this->sendConfirmationEmail($id, $command->email, $command->name);
-
-        return $id;
-    }
-
-    private function sendConfirmationEmail($id, $email, $name)
-    {
-        $message = \Swift_Message::newInstance()
-            ->setSubject(sprintf(
-                'Thanks for registering, %s',
-                $name
-            ))
-            ->setTo($email)
-            ->setBody(
-                $this->renderView(':email:registration.html.twig', [
-                    'accountId' => $id,
-                    'name' => $name,
-                ]),
-                'text/html'
-            )
-        ;
-
-        $this->get('mailer')->send($message);
     }
 
     private function accountManager(): AccountManager

@@ -22,8 +22,19 @@ services:
         arguments:
             - "@profile.repository.account"
             - "@profile.password_encoder"
+            - "@event_dispatcher"
 
     profile.password_encoder:
         class: ProfileBundle\Security\PasswordEncoder
         arguments:
             - "@security.encoder_factory"
+
+    profile.listener.send_mail_on_register:
+        class: ProfileBundle\EventListener\SendMailOnRegister
+        arguments:
+            - "@mailer"
+            - "@templating"
+        tags:
+            - name: kernel.event_listener
+              event: ProfileBundle\Entity\AccountWasRegistered
+              method: onAccountRegistration
