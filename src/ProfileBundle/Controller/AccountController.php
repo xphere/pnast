@@ -2,6 +2,7 @@
 
 namespace ProfileBundle\Controller;
 
+use ProfileBundle\Entity\Account;
 use ProfileBundle\Form\AccountRegistrationForm;
 use ProfileBundle\Form\AccountRegistration;
 use Sensio\Bundle\FrameworkExtraBundle\Configuration\Route;
@@ -47,47 +48,30 @@ class AccountController extends Controller
         $account = $this->findAccount($accountId);
 
         return $this->render('account/welcome.html.twig', [
-            'name' => $account['name'],
+            'name' => $account->name(),
         ]);
     }
 
-    private function findAccount($accountId)
+    private function findAccount($accountId): Account
     {
-        $connection = $this->databaseConnection();
-
-        $statement = $connection->query(sprintf(
-            'SELECT * FROM accounts WHERE id = %d LIMIT 1',
-            $accountId
-        ));
-
-        return $statement->fetch();
+        return $this->get('profile.repository.account')->byId($accountId);
     }
 
-    private function accountAlreadyExistsWithEmail($email)
+    private function saveAccount(Account $account): void
     {
-        $connection = $this->databaseConnection();
-
-        $statement = $connection->query(sprintf(
-            'SELECT id FROM accounts WHERE email = "%s" LIMIT 1',
-            $email
-        ));
-
-        return $statement->rowCount() > 0;
+        $this->get('profile.repository.account')->save($account);
     }
 
     private function doRegisterAccount(AccountRegistration $command)
     {
-        $connection = $this->databaseConnection();
-
-        $connection->exec(sprintf(
-            'INSERT INTO accounts SET email="%s", name="%s", password="%s"',
-            $command->email,
+        $account = new Account(
             $command->name,
+            $command->email,
             $command->password
-        ));
+        );
+        $this->saveAccount($account);
 
-        $id = $connection->lastInsertId();
-
+        $id = $account->id();
         $this->sendConfirmationEmail($id, $command->email, $command->name);
 
         return $id;
@@ -111,10 +95,5 @@ class AccountController extends Controller
         );
 
         mail($email, $subject, $message);
-    }
-
-    private function databaseConnection()
-    {
-        return new \PDO('mysql:host=127.0.0.1;dbname=profile', 'root', 'root');
     }
 }

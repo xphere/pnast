@@ -38,4 +38,7 @@ class Account
         $this->email = $email;
         $this->password = $password;
     }
+
+    public function id(): int { return $this->id; }
+    public function name(): string { return $this->name; }
 }
