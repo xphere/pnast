@@ -51,7 +51,7 @@ class DefaultController extends Controller
                 $accountId = $this->doRegisterAccount($email, $password, $name);
 
                 return $this->redirectToRoute('account_welcome', [
-                    'account-id' => $accountId,
+                    'accountId' => $accountId,
                 ]);
             }
         }
@@ -64,11 +64,16 @@ class DefaultController extends Controller
     }
 
     /**
-     * @Route("/welcome", name="account_welcome")
+     * @Route(
+     *     name="account_welcome",
+     *     path="/welcome/{accountId}",
+     *     requirements={
+     *         "accountId"="\d+",
+     *     },
+     * )
      */
-    public function welcomeAction(Request $request)
+    public function welcomeAction(int $accountId)
     {
-        $accountId = $request->query->get('account-id');
         $account = $this->findAccount($accountId);
 
         return $this->render('default/welcome.html.twig', [
@@ -131,7 +136,7 @@ class DefaultController extends Controller
         );
 
         $welcomeUrl = $this->generateUrl('account_welcome', [
-            'account-id' => $id,
+            'accountId' => $id,
         ]);
 
         $message = sprintf(
