@@ -4,6 +4,15 @@ parameters:
 #    parameter_name: value
 
 services:
-#    service_name:
-#        class: ProfileBundle\Directory\ClassName
-#        arguments: ["@another_service_name", "plain_value", "%parameter_name%"]
+
+    profile.validator_constraint.email_should_be_unique:
+        class: ProfileBundle\Validation\Constraints\EmailShouldBeUniqueValidator
+        arguments:
+            - "@profile.repository.account"
+        tags:
+            - { name: validator.constraint_validator }
+
+    profile.repository.account:
+        class: ProfileBundle\Entity\AccountRepository
+        factory: [ "@doctrine", getRepository ]
+        arguments: [ ProfileBundle\Entity\Account ]
